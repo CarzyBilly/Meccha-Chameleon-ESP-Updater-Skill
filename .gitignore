@@ -1,0 +1,30 @@
+# Codex / local workspace
+chameleon-work/
+.codex/
+.agents/
+
+# Build outputs
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.iobj
+*.ipdb
+*.obj
+*.lib
+*.exp
+*.tlog
+x64/
+.vs/
+
+# Logs and crash dumps
+*.log
+*.dmp
+Saved/
+Crashes/
+
+# Archives
+*.zip
+*.7z
+*.rar
+
