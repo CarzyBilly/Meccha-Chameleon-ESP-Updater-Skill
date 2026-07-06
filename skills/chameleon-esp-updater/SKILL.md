@@ -13,6 +13,23 @@ Resolve the user's real Desktop path at runtime. Do not hard-code `D:\Desktop` o
 
 This skill must be self-contained. Do not require, copy from, or compare against the creator's previous enhanced source folders, old DLLs, local final packages, or historical test workspaces. Only use a previous local build/source when the user explicitly asks for a regression comparison. In normal runs, reconstruct patches from the current upstream source, the current SDK evidence, and the patch rules in this skill.
 
+Allowed normal-run inputs:
+- current `phxgg/chameleonEsp` source downloaded from GitHub or supplied by the user
+- current local MECCHA CHAMELEON game files and version evidence
+- Visual Studio Build Tools/MSBuild detected on the user's machine
+- Dumper-7/Xenos downloaded during the run or explicitly supplied by the user
+- SDK generated during the run, or a fresh SDK dump explicitly supplied for the current game version
+- crash logs, screenshots, and runtime feedback from the current test
+
+Forbidden normal-run inputs:
+- the creator's old enhanced source package
+- old compiled DLLs
+- old SDK dumps
+- folders such as `D:\重要文件`, `D:\Desktop\chameleon-work`, `chameleonEsp-final-*`, or any previous local final/test package
+- copying source files from a past successful adaptation just to reproduce fixes
+
+If a useful fix was discovered in a previous session, encode the fix as a rule or code pattern in this skill, then apply it to the fresh upstream/source tree. Do not treat the old files themselves as part of the workflow.
+
 ## Desktop Path Discovery
 
 Before creating work/output folders, determine `DESKTOP_ROOT`:
