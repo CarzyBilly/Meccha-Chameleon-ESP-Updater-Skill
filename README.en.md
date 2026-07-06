@@ -8,7 +8,7 @@ This workflow is designed for two cases: first, the upstream project matches the
 
 The skill is self-contained. It does not require or depend on any previous enhanced package, old DLL, old source tree, SDK dump, or local test workspace from my machine. In the upstream-matching route, Codex downloads or uses a clean `phxgg/chameleonEsp` source tree and applies the patch rules in this skill. Only when the installed game is newer does it switch to the full SDK-dump route.
 
-In normal use, Codex should not read or copy any historical final package, old enhanced source, old DLL, old SDK dump, `D:\重要文件`, or a previous `chameleon-work` folder. Fixes verified in earlier sessions must be reproduced as rules from this skill against clean source.
+In the upstream-matching author-patch route, Codex should not read or copy any historical final package, old enhanced source, old DLL, old SDK dump, `D:\重要文件`, or a previous `chameleon-work` folder. Fixes verified in earlier sessions must be reproduced as rules from this skill against clean source. The from-zero route still follows the normal flow: find the game, prepare tools, dump the SDK, read the SDK, and build staged DLLs.
 
 ## Purpose
 
