@@ -1,4 +1,4 @@
-# Chameleon ESP Updater Skill
+# Meccha Chameleon ESP Updater Skill
 
 简体中文 | [English](README.en.md)
 
