@@ -87,8 +87,8 @@ Dump the SDK again and build six staged DLLs for testing.
 The skill follows this order:
 
 1. Detect the user's real Desktop path.
-2. Read the game display version, Steam buildid, and exe/UE version.
-3. Query SteamDB with fixed app id `4704690` for public app/package/depot update evidence, then compare it with the version declared in the upstream README/releases/latest commits.
+2. Read the game display version, Steam buildid, depot manifest, and exe/UE version, and keep those signals separate.
+3. Query SteamDB with fixed app id `4704690`, package, and depot pages for public app/package/depot update evidence, then compare it with the version declared in the upstream README/releases/latest commits.
 4. If the installed game version matches upstream, use the lighter route: prepare fresh upstream source and apply the tested crash, player-name, English/Simplified Chinese, and CJK font patches.
 5. If the installed game version is newer than upstream, or Steam buildid clearly moved after upstream last updated, use the from-zero route and dump a fresh SDK.
 6. Create the `chameleon-work` workspace.
@@ -113,7 +113,7 @@ Chameleon-ESP-Output\From-Zero      from-zero SDK dump adaptation output
 
 This folder contains the DLL to test/inject, the matching Xenos profile, `SHA256.txt`, and a short test note. `chameleon-work` remains the internal workspace for source, tools, SDK dumps, logs, and intermediate builds.
 
-The workflow keeps these version signals separate: `2.5.0` style values are player-facing game versions, Steam `buildid` is the locally installed package build, SteamDB app/package/depot timestamps show whether the public Steam package changed, and `++UE5+Release-...` is the engine/exe version. Route selection primarily compares the game display version with the upstream declaration, then uses local buildid plus SteamDB timestamps to catch same-version silent package updates.
+The workflow keeps these version signals separate: `2.5.0` / `2.5.1` style values are player-facing game versions and should only be compared directly with an author's declared Game Version; Steam `buildid` is the locally installed package build, for example game display version `2.5.1` may correspond to `buildid 24089838`; the depot manifest is a more precise Steam package-content signal; SteamDB app/package/depot timestamps show whether the public Steam package changed; and `++UE5+Release-...` is the engine/exe version. Route selection primarily compares the game display version with the upstream declaration, then uses local buildid, depot manifest, and SteamDB timestamps to catch same-version silent package updates.
 
 ## Build Stages
 

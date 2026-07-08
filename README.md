@@ -87,8 +87,8 @@ C:\Users\<你的用户名>\.codex\skills\chameleon-esp-updater
 skill 会按这个顺序执行：
 
 1. 自动识别用户真实桌面路径。
-2. 读取游戏显示版本、Steam buildid 和 exe/UE 版本。
-3. 通过 SteamDB 固定 app id `4704690` 查询公开 app/package/depot 更新时间，再对比原作者 README/release/最新提交声明支持的版本。
+2. 读取游戏显示版本、Steam buildid、Depot manifest 和 exe/UE 版本，并分开记录。
+3. 通过 SteamDB 固定 app id `4704690`、package 和 depot 页面查询公开 app/package/depot 更新时间，再对比原作者 README/release/最新提交声明支持的版本。
 4. 如果游戏版本和原作者一致，优先走轻量路线：下载/解压原作者源码，然后打已验证的崩溃、名字、中英双语和字体补丁。
 5. 如果本地游戏版本高于原作者，或者 Steam buildid 明显更新而作者还没跟进，则走从 0 路线：重新 dump SDK。
 6. 创建 `chameleon-work` 工作目录。
@@ -113,7 +113,7 @@ Chameleon-ESP-Output\From-Zero      从 0 dump SDK 适配输出
 
 这里会放用户要测试/注入的 DLL、对应 Xenos 配置、`SHA256.txt` 和简短测试说明。`chameleon-work` 仍作为内部工作目录保留源码、工具、SDK、日志和中间构建。
 
-版本判断里不要把这些信号混在一起：`2.5.0` 这类是游戏显示版本，Steam `buildid` 是本地安装包构建号，SteamDB 的 app/package/depot 更新时间表示公开 Steam 包是否变过，`++UE5+Release-...` 是引擎/exe 版本。优先用游戏显示版本和作者声明对比，再用本地 buildid 与 SteamDB 更新时间判断同版本下是否又有静默包更新。
+版本判断里不要把这些信号混在一起：`2.5.0`、`2.5.1` 这类是游戏显示版本，只能直接和作者声明的 Game Version 对比；Steam `buildid` 是本地安装包构建号，例如游戏显示 `2.5.1` 时可能对应 `buildid 24089838`；Depot manifest 是更细的 Steam 包内容标识；SteamDB 的 app/package/depot 更新时间表示公开 Steam 包是否变过；`++UE5+Release-...` 是引擎/exe 版本。优先用游戏显示版本和作者声明对比，再用本地 buildid、Depot manifest 与 SteamDB 更新时间判断同版本下是否又有静默包更新。
 
 ## 分阶段构建
 

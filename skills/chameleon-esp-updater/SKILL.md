@@ -69,21 +69,24 @@ README-test-this.txt
 
 Before deciding whether to patch upstream or dump the SDK from zero, collect local Steam evidence, SteamDB public evidence, and upstream author evidence. Do not rely on fuzzy web search for `Meccha Chameleon`; use the known Steam app id and fixed URLs.
 
-Record three different version signals separately:
-- **Game display version**: the player-facing version shown in the game UI, e.g. `2.5.0`. Prefer reading it from the title/settings screen if visible. If it is not exposed in local files, ask the user for the displayed version or ask for a screenshot.
-- **Steam buildid**: read from `steamapps\appmanifest_4704690.acf`, e.g. `buildid`. This is the installed package build, not the game display version.
+Record these version signals separately and never substitute one for another:
+- **Game display version**: the player-facing version shown in the game UI, e.g. `2.5.0` or `2.5.1`. Prefer reading it from the title/settings screen if visible. If it is not exposed in local files, ask the user for the displayed version or ask for a screenshot. This is the only signal that should be compared directly with an author's declared "Game Version" line.
+- **Steam buildid**: read from `steamapps\appmanifest_4704690.acf`, e.g. `buildid`. This is the installed package build, not the game display version. Example: game display version `2.5.1` may correspond to Steam `buildid` `24089838`.
+- **Steam depot manifest**: read the installed depot manifest under `InstalledDepots` in `appmanifest_4704690.acf`, e.g. depot `4704691` manifest `6464482406899752378`. Use this as a stronger package-change signal than the display version when SteamDB exposes it.
 - **Engine/exe version**: read from `PenguinHotel-Win64-Shipping.exe` file version, e.g. `++UE5+Release-...`. Use this as supporting evidence only; do not compare it as the game version.
 - **SteamDB app/package/depot evidence**: use app id `4704690` and SteamDB fixed URLs:
   - `https://steamdb.info/app/4704690/`
   - `https://steamdb.info/sub/1637192/apps/`
-  - if needed, the depot linked from the package/app page
-  Record SteamDB `Last Changenumber`, `Last Record Update`, package/depot `Last Update`, and any visible branch/build information. Treat SteamDB as external evidence that the public Steam package changed; do not treat it as the in-game display version.
+  - `https://steamdb.info/depot/4704691/`
+  Record SteamDB `Last Changenumber`, `Last Record Update`, package/depot `Last Update`, depot manifest/build id, and any visible branch/build information. Treat SteamDB as external evidence that the public Steam package changed; do not treat it as the in-game display version.
 - **Author support evidence**: inspect the latest `phxgg/chameleonEsp` README, release/tag notes, and latest commit timestamp. Record any declared line such as `Currently updated for Game Version: ...`.
 
 PowerShell evidence examples:
 ```powershell
 $manifest = '<steam library>\steamapps\appmanifest_4704690.acf'
-Select-String -LiteralPath $manifest -Pattern '"name"|"buildid"|"LastUpdated"|"installdir"'
+Select-String -LiteralPath $manifest -Pattern '"name"|"buildid"|"LastUpdated"|"installdir"|"4704691"|"manifest"'
+$lastUpdated = <LastUpdated from manifest>
+[DateTimeOffset]::FromUnixTimeSeconds($lastUpdated).ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz')
 $exe = '<game>\Chameleon\Binaries\Win64\PenguinHotel-Win64-Shipping.exe'
 [System.Diagnostics.FileVersionInfo]::GetVersionInfo($exe) | Select-Object FileVersion,ProductVersion,ProductName
 ```
@@ -93,7 +96,7 @@ Resolve the author's current support level:
 - Open `https://github.com/phxgg/chameleonEsp` and read the README/release/tag/latest commit evidence instead of relying on memory.
 - Compare local `buildid` and `LastUpdated` with SteamDB package/depot updates. If local Steam manifest is older than SteamDB, tell the user Steam may not have updated locally yet and ask them to verify/update the game before choosing a route.
 - Compare SteamDB package/depot update time with the author's latest relevant commit time. If SteamDB shows a newer game package/depot update after the author's latest update, treat upstream support as stale unless the author README/release explicitly declares the same current game version/build.
-- If the author declares only a game display version such as `2.5.0`, compare it to the user's displayed game version first, then use SteamDB/local `buildid` as the tie-breaker for same-version silent package changes.
+- If the author declares only a game display version such as `2.5.0`, compare it to the user's displayed game version first. If the user reports `2.5.1`, treat that as newer even if local Steam evidence is only a numeric `buildid`. Then use SteamDB/local `buildid` and depot manifest as the tie-breaker for same-version silent package changes.
 - If the author does not declare a game version/build and SteamDB is newer than the last author update, treat support as unknown/stale and prefer the full from-zero route.
 
 Route decision:
@@ -106,6 +109,7 @@ Route decision:
 When reporting this decision to the user, say exactly which route was chosen and include:
 - installed game display version
 - installed Steam buildid
+- installed depot manifest when available
 - SteamDB app/package/depot update evidence
 - author declared supported version/buildid and latest relevant commit time, or `unknown`
 - reason for choosing upstream patch or full SDK dump
