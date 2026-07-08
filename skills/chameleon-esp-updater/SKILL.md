@@ -67,12 +67,18 @@ README-test-this.txt
 
 ## Version Gate / Route Selection
 
-Before deciding whether to patch upstream or dump the SDK from zero, collect version evidence and choose the cheapest safe route.
+Before deciding whether to patch upstream or dump the SDK from zero, collect local Steam evidence, SteamDB public evidence, and upstream author evidence. Do not rely on fuzzy web search for `Meccha Chameleon`; use the known Steam app id and fixed URLs.
 
 Record three different version signals separately:
 - **Game display version**: the player-facing version shown in the game UI, e.g. `2.5.0`. Prefer reading it from the title/settings screen if visible. If it is not exposed in local files, ask the user for the displayed version or ask for a screenshot.
 - **Steam buildid**: read from `steamapps\appmanifest_4704690.acf`, e.g. `buildid`. This is the installed package build, not the game display version.
 - **Engine/exe version**: read from `PenguinHotel-Win64-Shipping.exe` file version, e.g. `++UE5+Release-...`. Use this as supporting evidence only; do not compare it as the game version.
+- **SteamDB app/package/depot evidence**: use app id `4704690` and SteamDB fixed URLs:
+  - `https://steamdb.info/app/4704690/`
+  - `https://steamdb.info/sub/1637192/apps/`
+  - if needed, the depot linked from the package/app page
+  Record SteamDB `Last Changenumber`, `Last Record Update`, package/depot `Last Update`, and any visible branch/build information. Treat SteamDB as external evidence that the public Steam package changed; do not treat it as the in-game display version.
+- **Author support evidence**: inspect the latest `phxgg/chameleonEsp` README, release/tag notes, and latest commit timestamp. Record any declared line such as `Currently updated for Game Version: ...`.
 
 PowerShell evidence examples:
 ```powershell
@@ -83,20 +89,25 @@ $exe = '<game>\Chameleon\Binaries\Win64\PenguinHotel-Win64-Shipping.exe'
 ```
 
 Resolve the author's current support level:
-- Check the latest `phxgg/chameleonEsp` release/tag/README/commit notes or user-provided upstream package for a declared game version or Steam buildid.
-- If internet access is available, verify the current GitHub state instead of relying on memory.
-- If the author does not declare a game version, treat the upstream support level as unknown and use a compile/runtime probe before doing the full dump.
+- If internet access is available, open SteamDB by app id `4704690` and the package URL above instead of searching by game name.
+- Open `https://github.com/phxgg/chameleonEsp` and read the README/release/tag/latest commit evidence instead of relying on memory.
+- Compare local `buildid` and `LastUpdated` with SteamDB package/depot updates. If local Steam manifest is older than SteamDB, tell the user Steam may not have updated locally yet and ask them to verify/update the game before choosing a route.
+- Compare SteamDB package/depot update time with the author's latest relevant commit time. If SteamDB shows a newer game package/depot update after the author's latest update, treat upstream support as stale unless the author README/release explicitly declares the same current game version/build.
+- If the author declares only a game display version such as `2.5.0`, compare it to the user's displayed game version first, then use SteamDB/local `buildid` as the tie-breaker for same-version silent package changes.
+- If the author does not declare a game version/build and SteamDB is newer than the last author update, treat support as unknown/stale and prefer the full from-zero route.
 
 Route decision:
 - If the installed game display version matches the author's declared supported version, and Steam buildid/date does not show a newer installed game than the author's update, use the lighter upstream patch route: apply the tested render crash, crowded-room name, stale-body/current-body ESP guard, English/Simplified Chinese, and CJK font patches to a fresh `phxgg/chameleonEsp` tree. The patch route must be implemented from the rules below, not by copying an old enhanced package.
 - If the installed game display version is greater than the author's declared supported version, or the Steam buildid clearly changed after the author's latest update, use the full from-zero route: Dumper-7, fresh SDK, code-level SDK reading, and staged DLL builds.
+- If SteamDB package/depot evidence shows a public game update after the author's latest relevant commit, use the full from-zero route unless the author's README/release explicitly says it supports that same update.
 - If the versions are equal but the patched upstream build still crashes, fails to compile against its SDK, or ESP fields behave like the SDK is stale, escalate to the full from-zero route.
 - If author support is unknown, first try the upstream patch route only when it can be built quickly and safely. If it fails at SDK fields/classes, do not keep patching blindly; switch to the from-zero route.
 
 When reporting this decision to the user, say exactly which route was chosen and include:
 - installed game display version
 - installed Steam buildid
-- author declared supported version/buildid, or `unknown`
+- SteamDB app/package/depot update evidence
+- author declared supported version/buildid and latest relevant commit time, or `unknown`
 - reason for choosing upstream patch or full SDK dump
 
 ## Upstream Patch Route
